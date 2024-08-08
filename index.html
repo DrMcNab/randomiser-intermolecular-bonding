@@ -21,7 +21,7 @@
             margin: 20px;
             font-size: 1.5em;
         }
-        button {
+        button, #toggleButton {
             padding: 10px 20px;
             font-size: 1em;
             background-color: blue;
@@ -30,7 +30,7 @@
             cursor: pointer;
             margin: 10px;
         }
-        button:hover {
+        button:hover, #toggleButton:hover {
             background-color: darkblue;
         }
         #force-type, #result, #score {
@@ -42,6 +42,7 @@
     <h1>Van Der Waals Force randomiser</h1>
     <div id="elements">Press the button to get a random non-metal element pair</div>
     <button onclick="randomiseNonMetals()">Get Non-Metals</button>
+    <button id="toggleButton" onclick="toggleEN()">Show Electronegativity</button>
     <div id="force-type">
         <p>Select the type of Van Der Waals forces:</p>
         <label><input type="checkbox" id="ldf"> London Dispersion Forces (LDF)</label><br>
@@ -70,6 +71,13 @@
         let selectedElements = [];
         let score = 0;
         let tries = 0;
+        let showEN = true;
+        let forceChecked = false;
+
+        function toggleEN() {
+            showEN = !showEN;
+            document.getElementById("toggleButton").innerHTML = showEN ? "Use Data Booklet" : "Show Electronegativity";
+        }
 
         function randomiseNonMetals() {
             let index1 = Math.floor(Math.random() * elements.length);
@@ -79,15 +87,21 @@
             } while(index1 === index2);
 
             selectedElements = [elements[index1], elements[index2]];
-            document.getElementById("elements").innerHTML = `${selectedElements[0].name} (${selectedElements[0].symbol}) and ${selectedElements[1].name} (${selectedElements[1].symbol})`;
+            document.getElementById("elements").innerHTML = `${selectedElements[0].name} (${selectedElements[0].symbol}${showEN ? `, EN: ${selectedElements[0].electronegativity}` : ''}) and ${selectedElements[1].name} (${selectedElements[1].symbol}${showEN ? `, EN: ${selectedElements[1].electronegativity}` : ''})`;
 
             document.getElementById("result").innerHTML = '';
             document.getElementById("ldf").checked = false;
             document.getElementById("pdpdi").checked = false;
             document.getElementById("hbond").checked = false;
+            forceChecked = false;
         }
 
         function checkForces() {
+            if (forceChecked) {
+                document.getElementById("result").innerHTML = "You've already checked this force selection. Please generate new elements.";
+                return;
+            }
+
             const ldfChecked = document.getElementById("ldf").checked;
             const pdpdiChecked = document.getElementById("pdpdi").checked;
             const hbondChecked = document.getElementById("hbond").checked;
@@ -99,7 +113,7 @@
                 correctForces = {ldf: true, pdpdi: false, hbond: false}; // Non-polar covalent
             } else if (enDifference >= 0.4 && enDifference < 1.8) {
                 correctForces = {ldf: true, pdpdi: true, hbond: false}; // Polar covalent
-            } 
+            }
 
             if ((selectedElements[0].symbol === "H" && (selectedElements[1].symbol === "O" || selectedElements[1].symbol === "N" || selectedElements[1].symbol === "F")) || 
                 (selectedElements[1].symbol === "H" && (selectedElements[0].symbol === "O" || selectedElements[0].symbol === "N" || selectedElements[0].symbol === "F"))) {
@@ -115,7 +129,9 @@
 
             tries++;
             document.getElementById("score").innerHTML = `Score: ${score} out of ${tries} tries.`;
+            forceChecked = true;
         }
     </script>
 </body>
 </html>
+
