@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Van Der Waals Force randomiser</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            color: #333;
+        }
+        #elements {
+            margin: 20px;
+            font-size: 1.5em;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            background-color: blue;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover {
+            background-color: darkblue;
+        }
+        #force-type, #result, #score {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Van Der Waals Force randomiser</h1>
+    <div id="elements">Press the button to get a random non-metal element pair</div>
+    <button onclick="randomiseNonMetals()">Get Non-Metals</button>
+    <div id="force-type">
+        <p>Select the type of Van Der Waals forces:</p>
+        <label><input type="checkbox" id="ldf"> London Dispersion Forces (LDF)</label><br>
+        <label><input type="checkbox" id="pdpdi"> Permanent Dipole-Permanent Dipole Interaction (PD-PDI)</label><br>
+        <label><input type="checkbox" id="hbond"> Hydrogen Bonding</label><br>
+        <button onclick="checkForces()">Check Forces</button>
+    </div>
+    <div id="result"></div>
+    <div id="score"></div>
+    <script>
+        const elements = [
+            {symbol: "H", name: "Hydrogen", type: "non-metal", electronegativity: 2.2},
+            {symbol: "B", name: "Boron", type: "non-metal", electronegativity: 2.0},
+            {symbol: "C", name: "Carbon", type: "non-metal", electronegativity: 2.6},
+            {symbol: "N", name: "Nitrogen", type: "non-metal", electronegativity: 3.0},
+            {symbol: "O", name: "Oxygen", type: "non-metal", electronegativity: 3.4},
+            {symbol: "F", name: "Fluorine", type: "non-metal", electronegativity: 4.0},
+            {symbol: "Si", name: "Silicon", type: "non-metal", electronegativity: 1.8},
+            {symbol: "P", name: "Phosphorus", type: "non-metal", electronegativity: 2.2},
+            {symbol: "S", name: "Sulfur", type: "non-metal", electronegativity: 2.6},
+            {symbol: "Cl", name: "Chlorine", type: "non-metal", electronegativity: 3.2},
+            {symbol: "Br", name: "Bromine", type: "non-metal", electronegativity: 2.8},
+            {symbol: "I", name: "Iodine", type: "non-metal", electronegativity: 2.7}
+        ];
+
+        let selectedElements = [];
+        let score = 0;
+        let tries = 0;
+
+        function randomiseNonMetals() {
+            let index1 = Math.floor(Math.random() * elements.length);
+            let index2;
+            do {
+                index2 = Math.floor(Math.random() * elements.length);
+            } while(index1 === index2);
+
+            selectedElements = [elements[index1], elements[index2]];
+            document.getElementById("elements").innerHTML = `${selectedElements[0].name} (${selectedElements[0].symbol}) and ${selectedElements[1].name} (${selectedElements[1].symbol})`;
+
+            document.getElementById("result").innerHTML = '';
+            document.getElementById("ldf").checked = false;
+            document.getElementById("pdpdi").checked = false;
+            document.getElementById("hbond").checked = false;
+        }
+
+        function checkForces() {
+            const ldfChecked = document.getElementById("ldf").checked;
+            const pdpdiChecked = document.getElementById("pdpdi").checked;
+            const hbondChecked = document.getElementById("hbond").checked;
+
+            const enDifference = Math.abs(selectedElements[0].electronegativity - selectedElements[1].electronegativity);
+            let correctForces = {ldf: true, pdpdi: false, hbond: false};
+
+            if (enDifference < 0.4) {
+                correctForces = {ldf: true, pdpdi: false, hbond: false}; // Non-polar covalent
+            } else if (enDifference >= 0.4 && enDifference < 1.8) {
+                correctForces = {ldf: true, pdpdi: true, hbond: false}; // Polar covalent
+            } 
+
+            if ((selectedElements[0].symbol === "H" && (selectedElements[1].symbol === "O" || selectedElements[1].symbol === "N" || selectedElements[1].symbol === "F")) || 
+                (selectedElements[1].symbol === "H" && (selectedElements[0].symbol === "O" || selectedElements[0].symbol === "N" || selectedElements[0].symbol === "F"))) {
+                correctForces.hbond = true; // H-bonding if H is bonded to O, N, or F
+            }
+
+            if (ldfChecked === correctForces.ldf && pdpdiChecked === correctForces.pdpdi && hbondChecked === correctForces.hbond) {
+                score++;
+                document.getElementById("result").innerHTML = `Correct!`;
+            } else {
+                document.getElementById("result").innerHTML = `Incorrect.`;
+            }
+
+            tries++;
+            document.getElementById("score").innerHTML = `Score: ${score} out of ${tries} tries.`;
+        }
+    </script>
+</body>
+</html>
